@@ -40,4 +40,4 @@ train_model = lm(formula = Rating ~ User + Artist + Track + Time + GENDER + AGE 
 test_predict = predict(train_model,test_users[c("User","Artist","Track","Time","GENDER","AGE","WORKING","REGION","MUSIC","LIST_OWN","LIST_BACK","Q1","Q2","Q3","Q4","Q5","Q6","Q7","Q8","Q9","Q10","Q11","Q12","Q13","Q14","Q15","Q16","Q17","Q18","Q19")])
 
 # Write the Output to a CSV file for submission
-write.csv(test_predict, file = "predict1.csv", row.names = F)
+write.csv(test_predict, file = "predict_1.csv", row.names = F)
