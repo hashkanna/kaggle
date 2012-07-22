@@ -1,7 +1,7 @@
 ############ Prepare and Predict ############
 
 ############ 
-	Prepare
+#	Prepare #
 ############
 # Prepare data by cleaning up various data and get it ready for prediction
 # Training Linear Model based on just three parameters Artist, Track, User and Time of Rating
@@ -27,7 +27,7 @@ test_users <- merge(test, clean_users, by.x="User", by.y="RESPID", all.x=T)
 test_users <- data.frame(apply(test_users, 2, mean_function))
 
 ############ 
-	Predict
+#	Predict #
 ############
 
 # Prediction based on the cleaned data
