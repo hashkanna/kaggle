@@ -1,0 +1,3 @@
+result3, groupBy Store/Dept, Rank 240
+result4, groupBy Store/Dept/WeekOfYear, 166
+

@@ -1,0 +1,2 @@
+UPDATE walmart_train SET week_num=CEIL((UNIX_TIMESTAMP(date)-1265328000)/604800)
+
