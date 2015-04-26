@@ -2,3 +2,9 @@
 *.pickle
 *.zip
 *.postgres
+*.gz
+*.png
+*.jpg
+*.tiff
+*.jpeg
+*.swp
