@@ -8,3 +8,7 @@
 *.tiff
 *.jpeg
 *.swp
+.DS_STORE
+.xlsx
+.xls
+.doc
