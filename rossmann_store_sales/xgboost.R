@@ -93,7 +93,7 @@ clf <- xgb.train(   params              = param,
                     maximize            = FALSE,
                     feval=RMPSE
 )
-pred1 <- exp(predict(clf, data.matrix(test[,features]))) -1
+pred1 <- exp(predict(clf, data.matrix(test[, .SD, .SDcols=features]))) -1
 submission <- data.frame(Id=test$Id, Sales=pred1)
 cat("saving the submission file\n")
-write_csv(submission, "result7_xgb.csv")
+write.csv(submission, "result7_xgb.csv")
