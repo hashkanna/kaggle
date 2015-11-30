@@ -10,7 +10,13 @@ store <- fread("store.csv",stringsAsFactors = F)
 # There are some NAs in the integer columns so conversion to zero
 train[is.na(train)]   <- 0
 test[is.na(test)]   <- 0
-store[is.na(store)]   <- 0
+# Impute the NA values with median 
+# store[is.na(store)]   <- 0
+store$CompetitionDistance[is.na(store$CompetitionDistance)] = median(store$CompetitionDistance, na.rm=TRUE)
+store$CompetitionOpenSinceMonth[is.na(store$CompetitionOpenSinceMonth)] = median(store$CompetitionOpenSinceMonth, na.rm=TRUE)
+store$CompetitionOpenSinceYear[is.na(store$CompetitionOpenSinceYear)] = median(store$CompetitionOpenSinceYear, na.rm=TRUE)
+store$Promo2SinceWeek[is.na(store$Promo2SinceWeek)] = median(store$Promo2SinceWeek, na.rm=TRUE)
+store$Promo2SinceYear[is.na(store$Promo2SinceYear)] = median(store$Promo2SinceYear, na.rm=TRUE)
 
 train <- train[Sales > 0,]  ## We are not judged on 0 sales records in test set
 ## See Scripts discussion from 10/8 for more explanation.
@@ -57,12 +63,20 @@ for (f in colnames(train)) {
 features<-colnames(train)[!(colnames(train) %in% c("Id","Date","Sales","logSales","Customers"))]
 
 # Define RMPSE function for evaluation during xgb training
-RMPSE<- function(preds, dtrain) {
+RMSPE<- function(preds, dtrain) {
   labels <- getinfo(dtrain, "label")
   elab<-exp(as.numeric(labels))-1
   epreds<-exp(as.numeric(preds))-1
   err <- sqrt(mean((epreds/elab-1)^2))
-  return(list(metric = "RMPSE", value = err))
+  return(list(metric = "RMSPE", value = err))
+}
+
+# Define RMSPE function for gradient calculation
+RMSPE_objective <- function(predts, dtrain) {
+  labels <- getinfo(dtrain, "label")
+  grad <- ifelse(labels == 0, 0, -1/labels+predts/(labels**2))
+  hess <- ifelse(labels == 0, 0, 1/(labels**2))
+  return(list(grad = grad, hess = hess))
 }
 
 tra<-train[, .SD, .SDcols=features]
@@ -73,7 +87,7 @@ dval<-xgb.DMatrix(data=data.matrix(tra[h,]),label=log(train$Sales+1)[h])
 dtrain<-xgb.DMatrix(data=data.matrix(tra[-h,]),label=log(train$Sales+1)[-h])
 
 watchlist<-list(val=dval,train=dtrain)
-param <- list(  objective           = "reg:linear", 
+param <- list(  objective           = RMSPE_objective, 
                 booster = "gbtree",
                 eta                 = 0.02, # 0.06, #0.01,
                 max_depth           = 10, #changed from default of 8
@@ -86,14 +100,14 @@ param <- list(  objective           = "reg:linear",
 
 clf <- xgb.train(   params              = param, 
                     data                = dtrain, 
-                    nrounds             = 3000, #300, #280, #125, #250, # changed from 300
+                    nrounds             = 6000, #300, #280, #125, #250, # changed from 300
                     verbose             = 0,
                     early.stop.round    = 100,
                     watchlist           = watchlist,
                     maximize            = FALSE,
-                    feval=RMPSE
+                    feval=RMSPE
 )
 pred1 <- exp(predict(clf, data.matrix(test[, .SD, .SDcols=features]))) -1
 submission <- data.frame(Id=test$Id, Sales=pred1)
 cat("saving the submission file\n")
-write.csv(submission, "result10_rounds6000_xgb.csv", row.names = F)
+write.csv(submission, "result9_xgb_imputation.csv", row.names = F)
