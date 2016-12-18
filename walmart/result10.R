@@ -1,0 +1,8 @@
+setwd('/Users/kanna/Sandbox/kaggle/walmart')
+train <- read.csv('walmart_train_full.csv')
+test <- read.csv('walmart_test_full.csv')
+#lmfit = lm( Weekly_Sales ~ Store + Dept + week_of_year + Temperature + Fuel_Price + CPI + Unemployment, data=train )
+lmfit = glm( Weekly_Sales ~ Store + Dept + week_of_year, data=train )
+result = predict(lmfit, newdata=test)
+write.table(result, "kanna.csv", row.names=FALSE, col.names=TRUE) 
+by(train$Weekly_Sales, c(train$Store, train$Dept) , median)
